@@ -1,8 +1,20 @@
-package br.com.snippet.twitterclient;
+package br.com.snippet.cordova.twitterclient;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
+
+import com.twitter.sdk.android.Twitter;
+import com.twitter.sdk.android.core.Callback;
+import com.twitter.sdk.android.core.Result;
+import com.twitter.sdk.android.core.TwitterApiClient;
+import com.twitter.sdk.android.core.TwitterAuthConfig;
+import com.twitter.sdk.android.core.TwitterCore;
+import com.twitter.sdk.android.core.TwitterException;
+import com.twitter.sdk.android.core.TwitterSession;
+import com.twitter.sdk.android.core.identity.TwitterLoginButton;
+import com.twitter.sdk.android.core.models.User;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
@@ -12,16 +24,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.Intent;
-
-import com.twitter.sdk.android.Twitter;
-import com.twitter.sdk.android.core.Callback;
-import com.twitter.sdk.android.core.Result;
-import com.twitter.sdk.android.core.TwitterAuthConfig;
-import com.twitter.sdk.android.core.TwitterCore;
-import com.twitter.sdk.android.core.TwitterException;
-import com.twitter.sdk.android.core.TwitterSession;
-import com.twitter.sdk.android.core.identity.TwitterLoginButton;
+import java.util.ArrayList;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -54,10 +57,17 @@ public class TwitterClient extends CordovaPlugin {
 			login(activity, callbackContext);
 			return true;
 		}
+
+		if (action.equals("friends")) {
+			friends(activity, callbackContext);
+			return true;
+		}
+
 		if (action.equals("logout")) {
 			logout(callbackContext);
 			return true;
 		}
+
 		return false;
 	}
 
@@ -67,10 +77,22 @@ public class TwitterClient extends CordovaPlugin {
 			public void run() {
 				Twitter.logIn(activity, new Callback<TwitterSession>() {
 					@Override
-					public void success(Result<TwitterSession> twitterSessionResult) {
+					public void success(final Result<TwitterSession> twitterSessionResult) {
 						Log.v(LOG_TAG, "Successful login session!");
-						callbackContext.success(handleResult(twitterSessionResult.data));
 
+						TwitterApiClient twitterApiClient = TwitterCore.getInstance().getApiClient();
+						twitterApiClient.getAccountService().verifyCredentials(false, false, new Callback<User>() {
+							@Override
+							public void success(Result<User> userResult) {
+								callbackContext.success(handleSessionResult(twitterSessionResult.data, userResult.data));
+							}
+
+							@Override
+							public void failure(TwitterException e) {
+								Log.v(LOG_TAG, "Failed credentials verification");
+								callbackContext.error("Failed credentials verification");
+							}
+						});
 					}
 
 					@Override
@@ -94,35 +116,53 @@ public class TwitterClient extends CordovaPlugin {
 		});
 	}
 
-	private void get(final Activity activity, final CallbackContext callbackContext) {
+	private void friends(final Activity activity, final CallbackContext callbackContext) {
 		cordova.getThreadPool().execute(new Runnable() {
 			@Override
 			public void run() {
-				Twitter.logIn(activity, new Callback<TwitterSession>() {
-					@Override
-					public void success(Result<TwitterSession> twitterSessionResult) {
-						Log.v(LOG_TAG, "Successful login session!");
-						callbackContext.success(handleResult(twitterSessionResult.data));
 
+				ArrayList<User> friends = new ArrayList<User>();
+
+				TwitterClientApiClient twitterApiClient = new TwitterClientApiClient(Twitter.getSessionManager().getActiveSession());
+				twitterApiClient.getFriendsService().friends(Twitter.getSessionManager().getActiveSession().getUserId(), null, null, 200, true, false, new Callback<User>() {
+					@Override
+					public void success(Result<User> userResult) {
+						String teste = "ok";
+						callbackContext.success(handleFriendsResult(userResult.data));
 					}
 
 					@Override
 					public void failure(TwitterException e) {
-						Log.v(LOG_TAG, "Failed login session");
-						callbackContext.error("Failed login session");
+						Log.v(LOG_TAG, "Failed credentials verification");
+						callbackContext.error("Failed credentials verification");
 					}
 				});
 			}
 		});
 	}
 
-	private JSONObject handleResult(TwitterSession result) {
+
+	private JSONObject handleFriendsResult(User user) {
 		JSONObject response = new JSONObject();
+
 		try {
-			response.put("userName", result.getUserName());
-			response.put("userId", result.getUserId());
-			response.put("secret", result.getAuthToken().secret);
-			response.put("token", result.getAuthToken().token);
+			response.put("profileImageUrl", user.profileImageUrl);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return response;
+	}
+
+
+	private JSONObject handleSessionResult(TwitterSession session, User user) {
+		JSONObject response = new JSONObject();
+
+		try {
+			response.put("userName", session.getUserName());
+			response.put("userId", session.getUserId());
+			response.put("secret", session.getAuthToken().secret);
+			response.put("token", session.getAuthToken().token);
+			response.put("profileImageUrl", user.profileImageUrl);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
