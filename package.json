@@ -1,6 +1,6 @@
 {
-  "name": "twitter-client-plugin",
-  "version": "0.4.0",
+  "name": "br.com.snippet.cordova.twitterclient",
+  "version": "0.1.0",
   "description": "Twitter Client Plugin - Allows single-sign on logins using Twitter + API calls",
   "cordova": {
     "id": "br.com.snippet.cordova.twitterclient",
