@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
@@ -14,9 +16,13 @@ import com.twitter.sdk.android.core.TwitterCore;
 import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.TwitterSession;
 import com.twitter.sdk.android.core.identity.TwitterLoginButton;
+import com.twitter.sdk.android.core.models.SafeListAdapter;
+import com.twitter.sdk.android.core.models.SafeMapAdapter;
+import com.twitter.sdk.android.core.models.Tweet;
 import com.twitter.sdk.android.core.models.User;
 
 import org.apache.cordova.CallbackContext;
+import org.apache.cordova.CordovaArgs;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CordovaWebView;
@@ -48,7 +54,7 @@ public class TwitterClient extends CordovaPlugin {
 		return preferences.getString("TwitterConsumerSecret", "");
 	}
 
-	public boolean execute(final String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
+	public boolean execute(final String action, CordovaArgs args, final CallbackContext callbackContext) throws JSONException {
 		Log.v(LOG_TAG, "Received: " + action);
 		this.action = action;
 		final Activity activity = this.cordova.getActivity();
@@ -59,8 +65,13 @@ public class TwitterClient extends CordovaPlugin {
 			return true;
 		}
 
-		if (action.equals("friends")) {
-			friends(activity, callbackContext);
+		if (action.equals("getFriendsList")) {
+			getFriendsList(activity, callbackContext);
+			return true;
+		}
+
+		if (action.equals("updateStatus")) {
+			updateStatus(activity, args, callbackContext);
 			return true;
 		}
 
@@ -117,7 +128,7 @@ public class TwitterClient extends CordovaPlugin {
 		});
 	}
 
-	private void friends(final Activity activity, final CallbackContext callbackContext) {
+	private void getFriendsList(final Activity activity, final CallbackContext callbackContext) {
 		cordova.getThreadPool().execute(new Runnable() {
 			@Override
 			public void run() {
@@ -130,7 +141,7 @@ public class TwitterClient extends CordovaPlugin {
 
 						friends.addAll(result.data.users);
 
-						if (result.data.nextCursor > 0){
+						if (result.data.nextCursor > 0) {
 							twitterApiClient.getFriendsService().friends(Twitter.getSessionManager().getActiveSession().getUserId(), null, result.data.nextCursor, 200, true, false, this);
 						} else {
 							Log.v(LOG_TAG, "Successful friends list loaded!");
@@ -148,6 +159,42 @@ public class TwitterClient extends CordovaPlugin {
 		});
 	}
 
+	private void updateStatus(final Activity activity, final CordovaArgs args, final CallbackContext callbackContext) throws JSONException {
+
+		final String status = args.getString(0);
+
+		cordova.getThreadPool().execute(new Runnable() {
+			@Override
+			public void run() {
+
+				TwitterApiClient twitterApiClient = TwitterCore.getInstance().getApiClient();
+				twitterApiClient.getStatusesService().update(status, null, false, null, null, null, false, false, new Callback<Tweet>() {
+					@Override
+					public void success(Result<Tweet> result) {
+
+						Log.v(LOG_TAG, "Status updates successfully");
+						callbackContext.success(handleTweetResult(result.data));
+					}
+
+					@Override
+					public void failure(TwitterException e) {
+						Log.v(LOG_TAG, "Failed push the status update");
+						callbackContext.error("Failed push the status update");
+					}
+				});
+			}
+		});
+	}
+
+	private String handleTweetResult(Tweet tweet) {
+
+		final Gson gson = new GsonBuilder()
+				.registerTypeAdapterFactory(new SafeListAdapter())
+				.registerTypeAdapterFactory(new SafeMapAdapter())
+				.create();
+
+		return gson.toJson(tweet);
+	}
 
 	private JSONArray handleFriendsResult(List<User> users) {
 

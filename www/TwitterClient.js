@@ -1,11 +1,14 @@
-var exec = require('cordova/exec');
+cordova.define("br.com.snippet.cordova.twitterclient.TwitterClient", function(require, exports, module) { var exec = require('cordova/exec');
 
 var TwitterClient = {
 	login: function (successCallback, errorCallback) {
 		exec(successCallback, errorCallback, 'TwitterClient', 'login', []);
 	},
-	friends: function (successCallback, errorCallback) {
-		exec(successCallback, errorCallback, 'TwitterClient', 'friends', []);
+	getFriendsList: function (successCallback, errorCallback) {
+		exec(successCallback, errorCallback, 'TwitterClient', 'getFriendsList', []);
+	},
+	updateStatus: function (statusText, successCallback, errorCallback, options) {
+		exec(successCallback, errorCallback, 'TwitterClient', 'updateStatus', [statusText, options]);
 	},
 	logout: function (successCallback, errorCallback) {
 		exec(successCallback, errorCallback, 'TwitterClient', 'logout', []);
@@ -13,3 +16,4 @@ var TwitterClient = {
 };
 
 module.exports = TwitterClient;
+});
