@@ -27,7 +27,7 @@ import io.fabric.sdk.android.Fabric;
 
 public class TwitterClient extends CordovaPlugin {
 
-	private static final String LOG_TAG = "Twitter Connect";
+	private static final String LOG_TAG = "Twitter Client";
 	private String action;
 
 	public void initialize(CordovaInterface cordova, CordovaWebView webView) {
