@@ -24,7 +24,7 @@
 		
 		<config-file target="res/xml/config.xml" parent="/*">
 			<feature name="TwitterClient">
-				<param name="android-package" value="com.manifestwebdesign.twitterclient.TwitterClient" />
+				<param name="android-package" value="br.com.snippet.twitterclient.TwitterClient" />
 			</feature>
 		</config-file>
 		<config-file target="AndroidManifest.xml" parent="/manifest/application">
@@ -32,7 +32,7 @@
 		</config-file>
 		 
 		<framework src="src/android/twitter.gradle" custom="true" type="gradleReference" />
-		<source-file src="src/android/TwitterClient.java" target-dir="src/com/manifestwebdesign/twitterclient" />
+		<source-file src="src/android/TwitterClient.java" target-dir="src/br/com/snippet/twitterclient" />
 	</platform>
 	
 	<!-- ios -->
