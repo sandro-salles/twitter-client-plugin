@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-			id="twitter-client-plugin"
+			id="br.com.snippet.cordova.twitterclient"
 	  version="0.4.0">
 	<name>Twitter Client</name>
 	<description>Twitter Client Plugin - Allows single-sign on logins using Twitter + API calls</description>
 	<license>Apache 2.0</license>
 	<keywords>cordova,twitter,login,connect</keywords>
-	<repo>https://github.com/sandro-salles/twitter-connect-plugin.git</repo>
-	<issue>https://github.com/sandro-salles/twitter-connect-plugin</issue>
+	<repo>https://github.com/sandro-salles/twitter-client-plugin.git</repo>
+	<issue>https://github.com/sandro-salles/twitter-client-plugin/issues</issue>
 
 	<engines>
 		<engine name="cordova-android" version=">3.9.9" /><!-- Requires Gradle building -->
@@ -24,7 +24,7 @@
 		
 		<config-file target="res/xml/config.xml" parent="/*">
 			<feature name="TwitterClient">
-				<param name="android-package" value="br.com.snippet.twitterclient.TwitterClient" />
+				<param name="android-package" value="br.com.snippet.cordova.twitterclient.TwitterClient" />
 			</feature>
 		</config-file>
 		<config-file target="AndroidManifest.xml" parent="/manifest/application">
@@ -32,7 +32,7 @@
 		</config-file>
 		 
 		<framework src="src/android/twitter.gradle" custom="true" type="gradleReference" />
-		<source-file src="src/android/TwitterClient.java" target-dir="src/br/com/snippet/twitterclient" />
+		<source-file src="src/android/TwitterClient.java" target-dir="src/br/com/snippet/cordova/twitterclient" />
 	</platform>
 	
 	<!-- ios -->

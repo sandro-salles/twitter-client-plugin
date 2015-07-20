@@ -1,4 +1,4 @@
-# twitter-connect-plugin
+# twitter-client-plugin
 Cordova/PhoneGap plugin to use Twitter Single Sign On
 
 Using Twitter's Fabric SDK, you can enable SSO with your Android and iOS apps. It's a fairly involved process, so I'll try to lay out every step necessary.
