@@ -25,6 +25,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -121,20 +122,26 @@ public class TwitterClient extends CordovaPlugin {
 			@Override
 			public void run() {
 
-				ArrayList<User> friends = new ArrayList<User>();
-
-				TwitterClientApiClient twitterApiClient = new TwitterClientApiClient(Twitter.getSessionManager().getActiveSession());
-				twitterApiClient.getFriendsService().friends(Twitter.getSessionManager().getActiveSession().getUserId(), null, null, 200, true, false, new Callback<User>() {
+				final ArrayList<User> friends = new ArrayList<User>();
+				final TwitterClientApiClient twitterApiClient = new TwitterClientApiClient(Twitter.getSessionManager().getActiveSession());
+				twitterApiClient.getFriendsService().friends(Twitter.getSessionManager().getActiveSession().getUserId(), null, null, 200, true, false, new Callback<TwitterClientApiClient.UsersCursor>() {
 					@Override
-					public void success(Result<User> userResult) {
-						String teste = "ok";
-						callbackContext.success(handleFriendsResult(userResult.data));
+					public void success(Result<TwitterClientApiClient.UsersCursor> result) {
+
+						friends.addAll(result.data.users);
+
+						if (result.data.nextCursor > 0){
+							twitterApiClient.getFriendsService().friends(Twitter.getSessionManager().getActiveSession().getUserId(), null, result.data.nextCursor, 200, true, false, this);
+						} else {
+							Log.v(LOG_TAG, "Successful friends list loaded!");
+							callbackContext.success(handleFriendsResult(friends));
+						}
 					}
 
 					@Override
 					public void failure(TwitterException e) {
-						Log.v(LOG_TAG, "Failed credentials verification");
-						callbackContext.error("Failed credentials verification");
+						Log.v(LOG_TAG, "Failed to load friends list");
+						callbackContext.error("Failed to load friends list");
 					}
 				});
 			}
@@ -142,13 +149,21 @@ public class TwitterClient extends CordovaPlugin {
 	}
 
 
-	private JSONObject handleFriendsResult(User user) {
-		JSONObject response = new JSONObject();
+	private JSONArray handleFriendsResult(List<User> users) {
 
-		try {
-			response.put("profileImageUrl", user.profileImageUrl);
-		} catch (JSONException e) {
-			e.printStackTrace();
+		JSONArray response = new JSONArray();
+
+		for (User user: users) {
+			JSONObject object = new JSONObject();
+			try {
+				object.put("name", user.name);
+				object.put("screenName", user.screenName);
+				object.put("id", user.id);
+				object.put("profileImageUrl", user.profileImageUrl);
+				response.put(object);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
 		}
 		return response;
 	}
@@ -158,8 +173,9 @@ public class TwitterClient extends CordovaPlugin {
 		JSONObject response = new JSONObject();
 
 		try {
-			response.put("userName", session.getUserName());
-			response.put("userId", session.getUserId());
+			response.put("name", user.name);
+			response.put("screenName", user.screenName);
+			response.put("id", user.id);
 			response.put("secret", session.getAuthToken().secret);
 			response.put("token", session.getAuthToken().token);
 			response.put("profileImageUrl", user.profileImageUrl);
