@@ -31,13 +31,13 @@ You should now be able to: `cordova run android` or `cordova run ios`
 
 ### Usage
 
-This plugin adds an object to the window named TwitterConnect. Right now, you can only login and logout.
+This plugin adds an object to the window named TwitterClient. Right now, you can only login and logout.
 
 ##### Login
 
 Login using the `.login` method:
 ```
-TwitterConnect.login(
+TwitterClient.login(
   function(result) {
     console.log('Successful login!');
     console.log(result);
@@ -62,7 +62,7 @@ The login reponse object is defined as:
 
 Logout using the `.logout` method:
 ```
-TwitterConnect.logout(
+TwitterClient.logout(
   function() {
 	console.log('Successful logout!');
   },

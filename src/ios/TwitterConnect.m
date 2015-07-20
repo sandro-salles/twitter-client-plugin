@@ -1,10 +1,10 @@
 
 #import <Foundation/Foundation.h>
-#import "TwitterConnect.h"
+#import "TwitterClient.h"
 #import <Fabric/Fabric.h>
 #import <TwitterKit/TwitterKit.h>
 
-@implementation TwitterConnect
+@implementation TwitterClient
 
 - (void)pluginInitialize
 {

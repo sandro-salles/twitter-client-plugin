@@ -1,4 +1,4 @@
-package com.manifestwebdesign.twitterconnect;
+package br.com.snippet.twitterclient;
 
 import android.app.Activity;
 import android.content.Context;
@@ -25,7 +25,7 @@ import com.twitter.sdk.android.core.identity.TwitterLoginButton;
 
 import io.fabric.sdk.android.Fabric;
 
-public class TwitterConnect extends CordovaPlugin {
+public class TwitterClient extends CordovaPlugin {
 
 	private static final String LOG_TAG = "Twitter Connect";
 	private String action;
@@ -33,7 +33,7 @@ public class TwitterConnect extends CordovaPlugin {
 	public void initialize(CordovaInterface cordova, CordovaWebView webView) {
 		super.initialize(cordova, webView);
 		Fabric.with(cordova.getActivity().getApplicationContext(), new Twitter(new TwitterAuthConfig(getTwitterKey(), getTwitterSecret())));
-		Log.v(LOG_TAG, "Initialize TwitterConnect");
+		Log.v(LOG_TAG, "Initialize TwitterClient");
 	}
 
 	private String getTwitterKey() {
@@ -90,6 +90,28 @@ public class TwitterConnect extends CordovaPlugin {
 				Twitter.logOut();
 				Log.v(LOG_TAG, "Logged out");
 				callbackContext.success();
+			}
+		});
+	}
+
+	private void get(final Activity activity, final CallbackContext callbackContext) {
+		cordova.getThreadPool().execute(new Runnable() {
+			@Override
+			public void run() {
+				Twitter.logIn(activity, new Callback<TwitterSession>() {
+					@Override
+					public void success(Result<TwitterSession> twitterSessionResult) {
+						Log.v(LOG_TAG, "Successful login session!");
+						callbackContext.success(handleResult(twitterSessionResult.data));
+
+					}
+
+					@Override
+					public void failure(TwitterException e) {
+						Log.v(LOG_TAG, "Failed login session");
+						callbackContext.error("Failed login session");
+					}
+				});
 			}
 		});
 	}

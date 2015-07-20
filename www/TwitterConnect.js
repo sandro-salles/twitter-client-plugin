@@ -1,12 +1,12 @@
 var exec = require('cordova/exec');
 
-var TwitterConnect = {
+var TwitterClient = {
 	login: function (successCallback, errorCallback) {
-		exec(successCallback, errorCallback, 'TwitterConnect', 'login', []);
+		exec(successCallback, errorCallback, 'TwitterClient', 'login', []);
 	},
 	logout: function (successCallback, errorCallback) {
-		exec(successCallback, errorCallback, 'TwitterConnect', 'logout', []);
+		exec(successCallback, errorCallback, 'TwitterClient', 'logout', []);
 	}
 };
 
-module.exports = TwitterConnect;
+module.exports = TwitterClient;

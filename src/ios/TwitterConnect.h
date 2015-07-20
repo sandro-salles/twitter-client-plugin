@@ -1,10 +1,10 @@
 
-#ifndef HelloWorld_TwitterConnect_h
-#define HelloWorld_TwitterConnect_h
+#ifndef HelloWorld_TwitterClient_h
+#define HelloWorld_TwitterClient_h
 
 #import <Cordova/CDV.h>
 
 
-@interface TwitterConnect : CDVPlugin
+@interface TwitterClient : CDVPlugin
 @end
 #endif
